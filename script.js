@@ -9,6 +9,10 @@ function Book(title, author, pages, isRead) {
   this.isRead = isRead;
 };
 
+Book.prototype.updateRead = function () {
+    this.isRead = !this.isRead;
+}
+
 const addBookToLibrary = (title, author, pages, isRead) => {
     const book = new Book(title, author, pages, isRead);
 
@@ -33,7 +37,7 @@ const removeBookElement = (bookId) => {
     if(myLibrary.length === 0) {
         showNotFoundError();
     }   
-    
+
     const tableRows = document.querySelectorAll('tr');
 
     tableRows.forEach((row) => {
@@ -42,6 +46,14 @@ const removeBookElement = (bookId) => {
             console.log('delet?');
         }
     });
+}
+
+const readBook = (bookId) => {
+    const index = findBookIndex(bookId);
+
+    if(index === -1) {
+        myLibrary[index].updateRead();
+    }
 }
 
 const showNotFoundError = () => {
@@ -70,6 +82,7 @@ const listBooks = () => {
         const pageColumn = document.createElement('th');
         const buttonColumn = document.createElement('th');
         const removeButton = document.createElement('button');
+        const readButton = document.createElement('button');
 
         tableRow.dataset.bookId = book['id'];
 
@@ -77,11 +90,16 @@ const listBooks = () => {
         removeButton.id = 'removeButton';
         removeButton.dataset.id = book['id'];
 
+        readButton.textContent = 'Read';
+        readButton.id = 'readButton';
+        readButton.dataset.id = book['id'];
+
         titleColumn.textContent = book['title'];
         authorColumn.textContent = book['author'];
         pageColumn.textContent = book['pages'];
 
         buttonColumn.appendChild(removeButton);
+        buttonColumn.appendChild(readButton);
 
         tableRow.appendChild(titleColumn);
         tableRow.appendChild(authorColumn);
@@ -95,7 +113,7 @@ const listBooks = () => {
 
 
 const handleButtons = () => {
-    const isReadedButtons = document.querySelectorAll('#readButton');
+    const readButtons = document.querySelectorAll('#readButton');
     const removeButtons = document.querySelectorAll('#removeButton');
         
     removeButtons.forEach((button) => {
@@ -103,6 +121,13 @@ const handleButtons = () => {
             removeBookFromLibrary(this.dataset.id);
         });
     });
+
+    readButtons.forEach((button) => {
+        button.addEventListener('click', function() {
+            readBook(this.dataset.id);
+        });
+    });
+
 
 };
 
