@@ -1,5 +1,24 @@
 const table = document.querySelector('#tbody');
+const modal = document.getElementById('createBookModal');
+const modalButton = document.getElementById('createBook');
+const closeModalButton = document.getElementsByClassName('close')[0];
+
+const addBookButton = document.querySelector('#saveBook');
+const bookTitleEl = document.querySelector('#bookTitle');
+const bookAuthorEl = document.querySelector('#bookAuthor');
+const bookPagesEl = document.querySelector('#bookPages');
+
+
 const myLibrary = [];
+
+modalButton.addEventListener('click', function() {
+    modal.style.display = 'block';
+});
+
+closeModalButton.addEventListener('click', function() {
+    modal.style.display = 'none';
+});
+
 
 function Book(title, author, pages, isRead) {
   this.id = crypto.randomUUID();
@@ -14,9 +33,7 @@ Book.prototype.updateRead = function () {
 }
 
 const addBookToLibrary = (title, author, pages, isRead) => {
-    const book = new Book(title, author, pages, isRead);
-
-    return myLibrary.push(book);
+    return myLibrary.push(new Book(title, author, pages, isRead));
 };
 
 const findBookIndex = (bookId) => {
@@ -43,7 +60,6 @@ const removeBookElement = (bookId) => {
     tableRows.forEach((row) => {
         if(row.dataset.bookId === bookId) {
             row.remove();
-            console.log('delet?');
         }
     });
 }
@@ -58,6 +74,7 @@ const readBook = (bookId) => {
 
 const showNotFoundError = () => {
     const tr = document.createElement('tr');
+    tr.id = 'notFoundRow';
     const notFoundColumn = document.createElement('th');
 
     notFoundColumn.setAttribute('colspan', 4);
@@ -71,6 +88,10 @@ const showNotFoundError = () => {
 }
 
 const listBooks = () => {
+    if(myLibrary.length > 0) {
+        destroyOldRows();
+    }
+
     if(myLibrary.length === 0) {
         showNotFoundError();
     }   
@@ -95,8 +116,13 @@ const listBooks = () => {
         readButton.dataset.id = book['id'];
 
         titleColumn.textContent = book['title'];
+        titleColumn.id = 'titleColumn';
+
         authorColumn.textContent = book['author'];
+        authorColumn.id = 'authorColumn';
+
         pageColumn.textContent = book['pages'];
+        pageColumn.id = 'pageColumn';
 
         buttonColumn.appendChild(removeButton);
         buttonColumn.appendChild(readButton);
@@ -108,9 +134,20 @@ const listBooks = () => {
 
         table.appendChild(tableRow);
     });
-    
 }
 
+const destroyOldRows = () => {
+    const notFoundRow = document.querySelector('#notFoundRow');
+    if(myLibrary.length > 0 && notFoundRow !== null) {
+        notFoundRow.remove();
+    }
+    
+    const existingTableRows = document.querySelectorAll('tr[data-book-id]');
+
+    existingTableRows.forEach((row) => {
+        row.remove();
+    });
+};
 
 const handleButtons = () => {
     const readButtons = document.querySelectorAll('#readButton');
@@ -127,13 +164,25 @@ const handleButtons = () => {
             readBook(this.dataset.id);
         });
     });
-
-
 };
 
-addBookToLibrary('Test', 'Test', 200, false);
-addBookToLibrary('Test2', 'Test2', 200, false);
+const main = () => {
+    listBooks();
+    handleButtons();
+}
 
-listBooks();
+addBookButton.addEventListener('click', function() {
+    let bookTitle = bookTitleEl.value;
+    let bookAuthor = bookAuthorEl.value;
+    let bookPages = bookPagesEl.value;
 
-handleButtons();
+    addBookToLibrary(bookTitle, bookAuthor, bookPages, false);
+    main();
+
+    bookTitleEl.value = '';
+    bookAuthorEl.value = '';
+    bookPagesEl.value = '';
+    modal.style.display = 'none';
+});
+
+
